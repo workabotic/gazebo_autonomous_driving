@@ -1,0 +1,9 @@
+[submodule "gazebo_ackermann_steering_vehicle"]
+	path = gazebo_ackermann_steering_vehicle
+	url = https://github.com/lucasmazzetto/gazebo_ackermann_steering_vehicle
+[submodule "gazebo_racing_tracks"]
+	path = gazebo_racing_tracks
+	url = https://github.com/lucasmazzetto/gazebo_racing_tracks
+[submodule "autopilot_neural_network"]
+	path = autopilot_neural_network
+	url = https://github.com/lucasmazzetto/autopilot_neural_network
