@@ -1,34 +1,47 @@
 # Gazebo Autonomous Driving
 
-## 🚗 About
+This repository provides an imitation learning training and inference package for autonomous driving simulation built with ROS 2 Jazzy Jalisco and Gazebo Harmonic. It includes a vehicle model simulation, multiple racing-track environments, tools for data collection, neural network training, and an autopilot node for autonomous driving inference.
 
-This repository provides a autonomous driving simulation environment built with ROS 2 Jazzy Jalisco and Gazebo Harmonic, combining a vehicle simulation, simulated racing tracks, and an autopilot package.
+![autonomous-driving](https://github.com/user-attachments/assets/49999351-1994-48db-906b-f1adadccbc3a)
 
-## 💻 Instalation
+A pretrained model is available for download if you want to quickly evaluate the system or skip the training step entirely. The model was trained in simulation using manual driving data collected in Gazebo and can be used directly with the provided autopilot inference node:
 
+**[Download pretrained model (model.pt)](https://huggingface.co/lucasmazzetto/autopilot_neural_network/resolve/main/model.pt)**
 
-Clone this repository into your computer using ```--recurse-submodules```, as the project relies on Git submodules.
+In the next sections, you’ll find detailed instructions covering installation, environment setup, data collection, training, inference, and configuration.
+
+## 💻 Installation
+
+Clone this repository on your computer using ```--recurse-submodules```, as the project relies on Git submodules.
 
 ```bash
 git clone --recurse-submodules git@github.com:lucasmazzetto/gazebo_autonomous_driving.git
 ```
 
-After cloning, move all the contents of the repository into the ROS 2 ```workspace/src``` directory. If you don't have a workspace set up, you can learn more about creating one in the [ROS 2 workspace tutorial](https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Creating-A-Workspace/Creating-A-Workspace.html).
+After cloning the repository, you can set up and run the project using one of the following approaches:
+
+- **[Linux Setup](#-linux-setup)**: Install and run the project on your system using Ubuntu and ROS 2, with all dependencies managed directly on the machine.
+
+- **[Docker Setup](#-docker-setup)**: Use a Docker-based environment with all required dependencies preconfigured, avoiding manual system setup.
+
+Both approaches are supported and described in the sections below.
+
+## 🐧 Linux Setup
+
+This project is designed to run on Linux Ubuntu 24.04, but it may also run on other Linux distributions, although additional adjustments might be required. 
+
+After cloning the repository, move all its contents into the ROS 2 `workspace/src` directory. If you don't have a workspace set up, you can learn more about creating one in the [ROS 2 workspace tutorial](https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Creating-A-Workspace/Creating-A-Workspace.html).
 
 ```bash
 mv gazebo_autonomous_driving/* <path_to_your_workspace>/src
 ```
 
-### 🐧 Linux Setup
-
-This project is designed to run on Linux Ubuntu 24.04 and may also work on other Linux versions or distributions, although additional adjustments might be required. 
-
-#### 📚 Requirements
+### 📚 Requirements
 
 To use this package, you'll need the following:
 
 - [Linux Ubuntu 24.04](https://ubuntu.com/blog/tag/ubuntu-24-04-lts)
-- [ROS2 Jazzy Jalisco](https://docs.ros.org/en/rolling/Releases/Release-Jazzy-Jalisco.html)
+- [ROS 2 Jazzy Jalisco](https://docs.ros.org/en/rolling/Releases/Release-Jazzy-Jalisco.html)
 - [Gazebo Harmonic](https://gazebosim.org/docs/harmonic/getstarted/)
 
 **Make sure to install the following ROS 2 Jazzy Jalisco packages:**
@@ -61,7 +74,7 @@ cd <path_to_your_workspace>/src/autopilot_neural_network
 pip install -r requirements.txt
 ```
 
-#### 🛠️ Build
+### 🛠️ Build
 
 Source the ROS 2 environment and the Python virtual environment, then build the package:
 
@@ -77,46 +90,17 @@ colcon build
 
 After a successful build, the system is ready to be used.
 
-### 🐳 Docker Setup
+### 🚀 Usage
 
-If you prefer not to set up the project directly on your Linux system, you can use **[Docker](https://www.docker.com/)** instead. It ensures a consistent environment and simplifies dependency management across different systems. Make sure Docker is properly installed and running on your machine before proceeding with the build and execution steps.
+The sections below provide a description of how to use the project when running directly on a Linux system. They cover data collection, model training, and inference.
 
+#### 📁 Data Collection
 
-#### 🛠️ Build
+To launch the simulation for data collection, first set the `dataset_path` parameter in `autopilot_neural_network/config/parameters.yaml` to the desired data location and rebuild the workspace to apply the changes. 
 
-To simplify the setup, a helper script is provided to build the Docker image. Navigate to the project directory and run the ./`build_docker.sh` script:
+Next, start the `gazebo_data_collection` launch file with the desired track through the `world` argument. Available tracks include `dirt_track`, `snow_track`, `sand_track`, and `grass_track`. The vehicle’s initial pose in the simulation can also be configured using the `x`, `y`, and `z` position arguments, along with the orientation arguments `R` (roll), `P` (pitch), and `Y` (yaw).
 
-```bash
-cd <path_to_the_project_directory>
-
-./build_docker.sh
-```
-
-#### 🏃 Run
-
-To run the project, it is necessary to configure Docker volumes for both the dataset directory and the trained model file. This can be done by creating a folder named `autopilot_neural_network` in your home directory, which will be mounted automatically, or by manually editing the `run_docker.sh` script to adjust the volume paths as needed.
-
-In summary, for a quick setup:
-
-```bash
-mkdir ~/autopilot_neural_network
-
-cd <path_to_the_project_directory>
-
-./run_docker.sh
-```
-
-When this script is executed, it starts the container and opens an interactive shell inside the Docker environment. From this shell, you can follow the next steps in the Usage section to collect the dataset, train the model, or run inference.
-
-However, no changes are required in `autopilot_neural_network/config/parameters.yaml` regarding the model path or the dataset directory. The Docker setup is already configured to use `/tmp/autopilot_neural_network/model.pt` for the model file and `/tmp/autopilot_neural_network/dataset` for the dataset, which are properly mapped to the host through Docker volumes.
-
-## 🚀 Usage
-
-### 🗂️ Data Collection
-
-Before collecting data, configure where the dataset will be stored. Update the `dataset_path` parameter in the `autopilot_neural_network/config/parameters.yaml` file to point to your desired dataset destination. Make sure to rebuild the system after changing the parameters.
-
-Then, to launch the simulation for data collection, set up the environment and start the `gazebo_data_collection` node with the desired track. Available tracks include `dirt_track`, `snow_track`, `grass_track`,`sand_track`, and `grass_track`:
+With the environment properly set up, you can launch the data collection simulation using the following command:
 
 ```bash
 source /opt/ros/jazzy/setup.bash 
@@ -132,9 +116,11 @@ ros2 launch gazebo_autonomous_driving gazebo_data_collector.launch.py \
   x:=1.6 y:=3.0 z:=0.5 R:=0.0 P:=0.0 Y:=1.57
 ```
 
-### 📉 Neural Network Training
+Once the launch file is running and an Xbox One joystick controller is connected to the computer, you can manually drive the vehicle inside the simulation. The system will then begin recording driving data according to the configured parameters, creating a dataset that can later be used to train the neural network.
 
-To start the training process, activate the Python virtual environment and run the training script with the dataset and model paths specified:
+#### 📉 Neural Network Training
+
+Start the training process by activating the Python virtual environment and running the training script. The `dataset_path` argument must point to the directory where the collected dataset is stored, while the `model_path` argument defines where the trained model checkpoint will be saved:
 
 ```bash
 source <path_to_your_venv>/bin/activate
@@ -145,45 +131,21 @@ python3 train.py --dataset_path <path_to_your_dataset> \
                  --model_path <path_to_your_model>
 ```
 
-The following arguments can be used with the `train.py` script to configure the training process:
+If you want to monitor the training process, you can run [TensorBoard](https://www.tensorflow.org/tensorboard) in another shell while the model is training. Once it is running, open a web browser and access it at `http://localhost:6006/` to view the training dashboards:
 
-- --`dataset_path`: Path to the directory containing the training dataset.
+```bash
+source <path_to_your_venv>/bin/activate
 
-- --`model_path`: Path where the best trained model checkpoint will be saved.
+cd <path_to_your_workspace>/src/autopilot_neural_network/scripts/
 
-- --`epochs`: Number of training epochs to run (default: 100).
+tensorboard --logdir=runs
+```
 
-- --`batch_size`: Batch size used for the training data loader (default: 1024).
+#### 🚗 Inference
 
-- --`val_batch_size`: Batch size used for the validation data loader (default: 256).
+Ensure the correct model path is configured before starting the autopilot node. Set the `model_path` parameter in `autopilot_neural_network/config/parameters.yaml` to the location of the trained model, then rebuild the workspace so the changes take effect.
 
-- --`val_fraction`: Fraction of the dataset reserved for validation (e.g., 0.2 uses 20% of the data for validation).
-
-- --`learning_rate`: Initial learning rate used by the optimizer  (default: 1e-3).
-
-- --`lr_patience`: Number of epochs without validation loss improvement before reducing the learning rate.
-
-- --`lr_factor`: Factor by which the learning rate is reduced when a plateau is detected.
-
-- --`alpha`: Weight applied to the velocity component of the loss function.
-
-- --`beta`: Weight applied to the steering angle component of the loss function.
-
-- --`num_workers`: Number of worker processes used for loading data (default: number of CPU cores minus one).
-
-- --`height`: Target height for resizing input images (default: 96 pixels).
-
-- --`width`: Target width for resizing input images (default: 128 pixels).
-
-- --`sampler_low_fraction`: Fraction of low-steering samples retained during dataset balancing.
-
-- --`sampler_threshold_ratio`: Steering ratio (relative to maximum steering) used to define the low-steering region.
-
-### 🚗 Inference
-
-Before starting the `autopilot` node, make sure the correct model is configured. Update the `model_path` parameter in the `autopilot_neural_network/config/parameters.yaml` file to point to the location of your trained model. This ensures that the autopilot loads and uses the intended neural network during execution. Make sure to rebuild the system after changing the parameters.
-
-Then, to launch the simulation for autopilot control, set up the environment and start the `gazebo_autopilot` node with the desired track.
+Next, to launch the simulation for autopilot control, set up the environment and start the `gazebo_autopilot` launch file with the desired track. Available tracks include `dirt_track`, `snow_track`, `sand_track`, and `grass_track`. You can also configure the vehicle’s initial pose in the simulation using the `x`, `y`, and `z` position arguments, along with the orientation arguments `R` (roll), `P` (pitch), and `Y` (yaw):
 
 ```bash
 source /opt/ros/jazzy/setup.bash 
@@ -198,9 +160,127 @@ ros2 launch gazebo_autonomous_driving gazebo_autopilot.launch.py \
   world:=$(ros2 pkg prefix gazebo_racing_tracks)/share/gazebo_racing_tracks/worlds/grass_track.sdf \
   x:=1.0 y:=1.0 z:=0.5 R:=0.0 P:=0.0 Y:=0.0
 ```
+
 If everything is set up correctly, the model will start driving the car autonomously.
 
-## ⚙️ Parameters
+## 🐳 Docker Setup
+
+If you prefer not to set up the project directly on the Linux system, you can use **[Docker](https://www.docker.com/)** instead. Make sure Docker is properly installed and running on your machine before proceeding with the build and execution steps.
+
+### 🛠️ Build
+
+To simplify the setup, a helper script is provided to build the Docker image. Navigate to the project directory and run the `build_docker.sh` script:
+
+```bash
+cd gazebo_autonomous_driving
+
+./build_docker.sh
+```
+
+### 🏃 Run
+
+A helper script is also available to start the Docker container and enter the runtime environment. The `run_docker.sh` script automatically configures the required Docker volumes by mounting the `~/autopilot_neural_network` directory from the host into the container, making it available for storing the dataset and trained model files.
+
+If you prefer to use a different directory on the host, you can modify the volume mount paths directly in the script. But, for a quick setup, simply create the `~/autopilot_neural_network` directory on the host machine and run the `run_docker.sh` script from the project directory:
+
+```bash
+mkdir ~/autopilot_neural_network
+
+cd gazebo_autonomous_driving
+
+./run_docker.sh
+```
+
+When this script is executed, it starts the container and opens an interactive shell inside the container. From this, you can follow the next steps in the Usage section to collect the dataset, train the model, or run inference.
+
+### 🚀 Usage
+
+The following sections describe how to use the project inside the Docker environment. These steps focus on running data collection, training, and inference directly from within the container, with datasets and models stored on the host through mounted volumes.
+
+#### 📁 Data Collection
+
+To launch the simulation for data collection, start the `gazebo_data_collection` launch file with the desired track through the `world` argument. Available tracks include `dirt_track`, `snow_track`, `sand_track`, and `grass_track`. The vehicle’s initial pose in the simulation can also be configured using the `x`, `y`, and `z` position arguments, along with the orientation arguments `R` (roll), `P` (pitch), and `Y` (yaw):
+
+```bash
+ros2 launch gazebo_autonomous_driving gazebo_data_collector.launch.py \
+  world:=$(ros2 pkg prefix gazebo_racing_tracks)/share/gazebo_racing_tracks/worlds/dirt_track.sdf \
+  x:=1.6 y:=3.0 z:=0.5 R:=0.0 P:=0.0 Y:=1.57
+```
+Once the launch file is running and an Xbox One joystick controller is connected to the computer, you can manually drive the vehicle inside the simulation. The dataset will be stored in the `~/autopilot_neural_network` directory on the host machine.
+
+#### 📉 Neural Network Training
+
+Access the `autopilot_neural_network/scripts` directory located at `~/workspace/src/` inside the container and run the `train.py` script from there to start the training process:
+
+```bash
+cd ~/workspace/src/autopilot_neural_network/scripts/
+
+python3 train.py
+```
+
+If you want to monitor the training process, you can run [TensorBoard](https://www.tensorflow.org/tensorboard) in another shell inside the container while the model is training. Once it is running, open a web browser and access it at `http://localhost:6006/` to view the training dashboards:
+
+```bash
+cd ~/workspace/src/autopilot_neural_network/scripts/
+
+tensorboard --logdir=runs
+```
+
+#### 🚗 Inference
+
+The trained model must be named `model.pt` and placed inside the `~/autopilot_neural_network` directory on the host machine. This directory is mounted as a volume, allowing the container to access and load the model during execution. 
+
+Next, to launch the simulation for autopilot control, start the `gazebo_autopilot` launch file with the desired track. Available tracks include `dirt_track`, `snow_track`, `sand_track`, and `grass_track`. You can also configure the vehicle’s initial pose in the simulation using the `x`, `y`, and `z` position arguments, along with the orientation arguments `R` (roll), `P` (pitch), and `Y` (yaw):
+
+```bash
+ros2 launch gazebo_autonomous_driving gazebo_autopilot.launch.py \
+  world:=$(ros2 pkg prefix gazebo_racing_tracks)/share/gazebo_racing_tracks/worlds/grass_track.sdf \
+  x:=1.0 y:=1.0 z:=0.5 R:=0.0 P:=0.0 Y:=0.0
+```
+
+If everything is set up correctly, the model will start driving the car autonomously.
+
+## 🔧 Configuration
+
+This section describes the available configuration options for the project, including training hyperparameters, vehicle settings, and other parameters. These options allow you to customize the learning process, simulation behavior, and data handling for your specific use case.
+
+### ⚙️ Training Hyperparameters
+
+The following arguments can be used with the `train.py` script to configure the training process:
+
+- `--dataset_path`: Path to the directory containing the training dataset.
+
+- `--model_path`: Path where the best trained model checkpoint will be saved.
+
+- `--epochs`: Number of training epochs to run (default: 100).
+
+- `--batch_size`: Batch size used for the training data loader (default: 1024).
+
+- `--val_batch_size`: Batch size used for the validation data loader (default: 256).
+
+- `--val_fraction`: Fraction of the dataset reserved for validation (e.g., 0.2 uses 20% of the data for validation).
+
+- `--learning_rate`: Initial learning rate used by the optimizer  (default: 1e-3).
+
+- `--lr_patience`: Number of epochs without validation loss improvement before reducing the learning rate.
+
+- `--lr_factor`: Factor by which the learning rate is reduced when a plateau is detected.
+
+- `--alpha`: Weight applied to the velocity component of the loss function.
+
+- `--beta`: Weight applied to the steering angle component of the loss function.
+
+- `--num_workers`: Number of worker processes used for loading data (default: number of CPU cores minus one).
+
+- `--height`: Target height for resizing input images (default: 96 pixels).
+
+- `--width`: Target width for resizing input images (default: 128 pixels).
+
+- `--sampler_low_fraction`: Fraction of low-steering samples retained during dataset balancing.
+
+- `--sampler_threshold_ratio`: Steering ratio (relative to maximum steering) used to define the low-steering region.
+
+### ⚙️ Node Parameters
 
 The parameters for the vehicle model, control, and camera can be configured in the ```gazebo_ackermann_steering_vehicle/config/parameters.yaml``` file. This file includes the following settings with their default values for the simulation:
 
@@ -234,7 +314,7 @@ image_width: 640 # Width of the camera's image output [pixels]
 image_height: 480 # Height of the camera's image output [pixels]
 ```
 
-The parameters for the data colection and inference nodes can be configured in the `autopilot_neural_network/config/parameters.yaml` file. This file includes the following settings with their default values:
+The parameters for the data collection and inference nodes can be configured in the `autopilot_neural_network/config/parameters.yaml` file. This file includes the following settings with their default values:
 
 ```yaml
 # Vehicle node and topics
