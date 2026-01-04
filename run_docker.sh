@@ -18,6 +18,7 @@ else
     --privileged \
     --runtime=nvidia \
     --ipc=host \
+    --network host \
     --env DISPLAY=$DISPLAY \
     --env QT_X11_NO_MITSHM=1 \
     --env XAUTHORITY=/tmp/.docker.xauth \
