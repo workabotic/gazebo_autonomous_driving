@@ -17,6 +17,7 @@ else
     --name ${CONTAINER_NAME} \
     --privileged \
     --runtime=nvidia \
+    --ipc=host \
     --env DISPLAY=$DISPLAY \
     --env QT_X11_NO_MITSHM=1 \
     --env XAUTHORITY=/tmp/.docker.xauth \
